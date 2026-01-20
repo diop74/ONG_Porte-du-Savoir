@@ -104,11 +104,7 @@ export default function AdminLogin() {
 
           {/* Demo credentials */}
           <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-            <p className="text-xs text-slate-500 text-center">
-              <strong>Identifiants de démonstration:</strong><br />
-              Email: admin@portedusavoir.org<br />
-              Mot de passe: Admin123!
-            </p>
+            
           </div>
         </div>
       </div>
