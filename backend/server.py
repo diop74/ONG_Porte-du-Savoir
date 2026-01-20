@@ -119,6 +119,13 @@ class MemberCreate(BaseModel):
     phone: str
     motivation: str
 
+class MemberAdminCreate(BaseModel):
+    name: str
+    email: EmailStr
+    phone: str
+    member_type: str = "actif"
+    bio: Optional[str] = None
+
 class MemberResponse(MemberBase):
     model_config = ConfigDict(extra="ignore")
     id: str
