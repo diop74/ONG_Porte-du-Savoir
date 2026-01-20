@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Plus, Trash2, FileText } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Plus, Trash2, FileText, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,6 +15,8 @@ export default function AdminDocuments() {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -35,6 +37,57 @@ export default function AdminDocuments() {
       console.error("Error:", e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const allowedTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Type de fichier non autorisé. Utilisez PDF ou DOC.");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Fichier trop volumineux. Maximum 10MB.");
+      return;
+    }
+
+    setUploading(true);
+    const token = localStorage.getItem("token");
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", file);
+
+    try {
+      const res = await fetch(`${API}/api/upload/document`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formDataUpload,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // Detect file type from filename
+        const ext = file.name.split(".").pop().toLowerCase();
+        const fileType = ext === "pdf" ? "pdf" : ext === "docx" ? "docx" : "doc";
+        
+        setFormData({ 
+          ...formData, 
+          file_url: `${API}${data.url}`,
+          file_type: fileType,
+          title: formData.title || file.name.replace(/\.[^/.]+$/, "")
+        });
+        toast.success("Document téléchargé");
+      } else {
+        const error = await res.json();
+        toast.error(error.detail || "Erreur lors du téléchargement");
+      }
+    } catch (e) {
+      toast.error("Erreur de connexion");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -182,6 +235,48 @@ export default function AdminDocuments() {
             <DialogTitle>Ajouter un document</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4" data-testid="document-form">
+            {/* File Upload */}
+            <div>
+              <Label>Fichier du document *</Label>
+              <div className="mt-2">
+                {formData.file_url ? (
+                  <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg">
+                    <FileText className="w-6 h-6 text-emerald-600" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-emerald-800">Document téléchargé</p>
+                      <p className="text-xs text-emerald-600 truncate">{formData.file_url}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, file_url: "" })}
+                      className="text-emerald-600 hover:text-emerald-800"
+                    >
+                      Changer
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center cursor-pointer hover:border-sky-500 transition-colors"
+                  >
+                    <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
+                    <p className="text-sm text-slate-600">
+                      {uploading ? "Téléchargement..." : "Cliquez pour télécharger un document"}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-1">PDF, DOC, DOCX (max 10MB)</p>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  data-testid="document-file-upload"
+                />
+              </div>
+            </div>
+
             <div>
               <Label htmlFor="title">Titre *</Label>
               <Input
@@ -204,21 +299,7 @@ export default function AdminDocuments() {
                 data-testid="document-description-input"
               />
             </div>
-            <div>
-              <Label htmlFor="file_url">URL du fichier *</Label>
-              <Input
-                id="file_url"
-                value={formData.file_url}
-                onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
-                required
-                placeholder="https://drive.google.com/..."
-                className="mt-1"
-                data-testid="document-url-input"
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                Utilisez un lien Google Drive, Dropbox ou autre service de stockage
-              </p>
-            </div>
+            
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="category">Catégorie</Label>
@@ -253,11 +334,32 @@ export default function AdminDocuments() {
                 </Select>
               </div>
             </div>
+
+            {/* Fallback URL input */}
+            {!formData.file_url && (
+              <div>
+                <Label htmlFor="file_url" className="text-xs text-slate-500">Ou entrez une URL externe</Label>
+                <Input
+                  id="file_url"
+                  value={formData.file_url}
+                  onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
+                  placeholder="https://drive.google.com/..."
+                  className="mt-1"
+                  data-testid="document-url-input"
+                />
+              </div>
+            )}
+
             <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" onClick={closeModal}>
                 Annuler
               </Button>
-              <Button type="submit" className="btn-primary" data-testid="document-submit-btn">
+              <Button 
+                type="submit" 
+                className="btn-primary" 
+                disabled={!formData.file_url}
+                data-testid="document-submit-btn"
+              >
                 Ajouter
               </Button>
             </div>
