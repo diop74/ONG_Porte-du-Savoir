@@ -416,6 +416,44 @@ async def delete_member(member_id: str, user: dict = Depends(require_admin)):
         raise HTTPException(status_code=404, detail="Membre non trouvé")
     return {"message": "Membre supprimé"}
 
+@api_router.post("/members", response_model=MemberResponse)
+async def create_member(member: MemberAdminCreate, user: dict = Depends(require_admin)):
+    """Admin creates a member directly (already approved)"""
+    now = datetime.now(timezone.utc).isoformat()
+    member_doc = {
+        "id": str(uuid.uuid4()),
+        "name": member.name,
+        "email": member.email,
+        "phone": member.phone,
+        "member_type": member.member_type,
+        "bio": member.bio,
+        "motivation": None,
+        "approved": True,
+        "created_at": now,
+        "updated_at": now
+    }
+    await db.members.insert_one(member_doc)
+    return {k: v for k, v in member_doc.items() if k != "_id"}
+
+@api_router.put("/members/{member_id}")
+async def update_member(member_id: str, member: MemberAdminCreate, user: dict = Depends(require_admin)):
+    """Admin updates a member"""
+    existing = await db.members.find_one({"id": member_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Membre non trouvé")
+    
+    update_data = {
+        "name": member.name,
+        "email": member.email,
+        "phone": member.phone,
+        "member_type": member.member_type,
+        "bio": member.bio,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.members.update_one({"id": member_id}, {"$set": update_data})
+    updated = await db.members.find_one({"id": member_id}, {"_id": 0})
+    return updated
+
 # ==================== DOCUMENTS ROUTES ====================
 
 @api_router.get("/documents", response_model=List[DocumentResponse])
