@@ -95,10 +95,10 @@ export default function ContactPage() {
                     <div>
                       <h4 className="font-medium text-slate-900">Email</h4>
                       <a
-                        href={`mailto:${content.email || "contact@portedusavoir.org"}`}
+                        href={`mailto:${content.email || "thiamabdoulaye2245@gmail.com"}`}
                         className="text-sky-600 text-sm hover:underline"
                       >
-                        {content.email || "contact@portedusavoir.org"}
+                        {content.email || "thiamabdoulaye2245@gmail.com"}
                       </a>
                     </div>
                   </div>
@@ -109,10 +109,10 @@ export default function ContactPage() {
                     <div>
                       <h4 className="font-medium text-slate-900">Téléphone</h4>
                       <a
-                        href={`tel:${content.phone || "+22245000000"}`}
+                        href={`tel:${content.phone || "+22244450366"}`}
                         className="text-sky-600 text-sm hover:underline"
                       >
-                        {content.phone || "+222 45 00 00 00"}
+                        {content.phone || "+222 44 45 03 66"}
                       </a>
                     </div>
                   </div>
