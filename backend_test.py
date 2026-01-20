@@ -357,6 +357,9 @@ def main():
     tester.test_admin_endpoints()
     tester.test_project_crud()
     tester.test_article_crud()
+    tester.test_upload_endpoints()
+    tester.test_member_management()
+    tester.test_static_file_serving()
     
     # Print summary and return appropriate exit code
     success = tester.print_summary()
