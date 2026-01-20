@@ -786,6 +786,9 @@ async def root():
 # Include router
 app.include_router(api_router)
 
+# Serve uploaded files statically
+app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
