@@ -1,10 +1,12 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, UploadFile, File, Form, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import shutil
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import List, Optional
@@ -16,6 +18,17 @@ import base64
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+# Upload directories
+UPLOAD_DIR = ROOT_DIR / "uploads"
+IMAGES_DIR = UPLOAD_DIR / "images"
+DOCUMENTS_DIR = UPLOAD_DIR / "documents"
+IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
+
+ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+ALLOWED_DOC_TYPES = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
