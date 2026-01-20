@@ -192,8 +192,8 @@ export const Footer = () => {
             <ul className="space-y-2 text-sm text-white/70">
               <li>Quartier Numerowatt</li>
               <li>Nouadhibou, Mauritanie</li>
-              <li>contact@portedusavoir.org</li>
-              <li>+222 45 00 00 00</li>
+              <li>thiamabdoulaye2245@gmail.com</li>
+              <li>+222 44 45 03 66</li>
             </ul>
           </div>
         </div>
