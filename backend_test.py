@@ -51,7 +51,7 @@ class PorteDuSavoirAPITester:
                     'actual': response.status_code,
                     'response': response.text[:200]
                 })
-                print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
+                print(f" Failed - Expected {expected_status}, got {response.status_code}")
                 print(f"   Response: {response.text[:200]}")
 
             return success, response.json() if success and response.text else {}
@@ -61,18 +61,18 @@ class PorteDuSavoirAPITester:
                 'name': name,
                 'error': str(e)
             })
-            print(f"❌ Failed - Error: {str(e)}")
+            print(f" Failed - Error: {str(e)}")
             return False, {}
 
     def test_seed_data(self):
         """Initialize seed data"""
-        print("\n🌱 Initializing seed data...")
+        print("\n Initializing seed data...")
         success, response = self.run_test("Seed Data", "POST", "", 200)
         return success
 
     def test_admin_login(self):
         """Test admin login and get token"""
-        print("\n🔐 Testing Admin Authentication...")
+        print("\n Testing Admin Authentication...")
         success, response = self.run_test(
             "Admin Login",
             "POST",
