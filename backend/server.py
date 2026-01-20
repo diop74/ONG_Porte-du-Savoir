@@ -569,6 +569,70 @@ async def get_admin_stats(user: dict = Depends(require_admin)):
         "unread_messages": unread_messages
     }
 
+# ==================== UPLOAD ROUTES ====================
+
+@api_router.post("/upload/image")
+async def upload_image(file: UploadFile = File(...), user: dict = Depends(require_admin)):
+    """Upload an image file"""
+    if file.content_type not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(status_code=400, detail="Type de fichier non autorisé. Utilisez JPG, PNG, WebP ou GIF.")
+    
+    # Check file size
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="Fichier trop volumineux. Maximum 10MB.")
+    
+    # Generate unique filename
+    ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+    filename = f"{uuid.uuid4()}.{ext}"
+    filepath = IMAGES_DIR / filename
+    
+    # Save file
+    with open(filepath, "wb") as f:
+        f.write(content)
+    
+    # Return URL
+    return {"url": f"/uploads/images/{filename}", "filename": filename}
+
+@api_router.post("/upload/document")
+async def upload_document(file: UploadFile = File(...), user: dict = Depends(require_admin)):
+    """Upload a document file (PDF, DOC)"""
+    if file.content_type not in ALLOWED_DOC_TYPES:
+        raise HTTPException(status_code=400, detail="Type de fichier non autorisé. Utilisez PDF ou DOC.")
+    
+    # Check file size
+    content = await file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="Fichier trop volumineux. Maximum 10MB.")
+    
+    # Generate unique filename while keeping original name info
+    original_name = file.filename.rsplit(".", 1)[0] if "." in file.filename else file.filename
+    ext = file.filename.split(".")[-1] if "." in file.filename else "pdf"
+    filename = f"{uuid.uuid4()}_{original_name[:30]}.{ext}"
+    filepath = DOCUMENTS_DIR / filename
+    
+    # Save file
+    with open(filepath, "wb") as f:
+        f.write(content)
+    
+    # Return URL
+    return {"url": f"/uploads/documents/{filename}", "filename": filename}
+
+@api_router.delete("/upload/{file_type}/{filename}")
+async def delete_upload(file_type: str, filename: str, user: dict = Depends(require_admin)):
+    """Delete an uploaded file"""
+    if file_type == "images":
+        filepath = IMAGES_DIR / filename
+    elif file_type == "documents":
+        filepath = DOCUMENTS_DIR / filename
+    else:
+        raise HTTPException(status_code=400, detail="Type de fichier invalide")
+    
+    if filepath.exists():
+        os.remove(filepath)
+        return {"message": "Fichier supprimé"}
+    raise HTTPException(status_code=404, detail="Fichier non trouvé")
+
 # ==================== SEED DATA ====================
 
 @api_router.post("/seed")
