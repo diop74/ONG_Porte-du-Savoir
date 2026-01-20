@@ -67,7 +67,7 @@ class PorteDuSavoirAPITester:
     def test_seed_data(self):
         """Initialize seed data"""
         print("\n Initializing seed data...")
-        success, response = self.run_test("Seed Data", "POST", "", 200)
+        success, response = self.run_test("Seed Data", "POST", "seed", 200)
         return success
 
     def test_admin_login(self):
