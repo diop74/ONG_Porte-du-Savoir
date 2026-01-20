@@ -261,8 +261,8 @@ async def create_project(project: ProjectCreate, user: dict = Depends(require_ad
         "updated_at": now
     }
     await db.projects.insert_one(project_doc)
-    del project_doc["_id"] if "_id" in project_doc else None
-    return project_doc
+    result = await db.projects.find_one({"id": project_doc["id"]}, {"_id": 0})
+    return result
 
 @api_router.put("/projects/{project_id}", response_model=ProjectResponse)
 async def update_project(project_id: str, project: ProjectCreate, user: dict = Depends(require_admin)):
