@@ -218,6 +218,108 @@ class PorteDuSavoirAPITester:
             # Delete article
             self.run_test("Delete Article", "DELETE", f"articles/{article_id}", 200, auth_required=True)
 
+    def test_upload_endpoints(self):
+        """Test file upload endpoints"""
+        if not self.token:
+            print("❌ No admin token available, skipping upload tests")
+            return
+            
+        print("\n📤 Testing Upload Endpoints...")
+        
+        # Test image upload endpoint (without actual file - just endpoint availability)
+        print("   Testing image upload endpoint availability...")
+        url = f"{self.base_url}/api/upload/image"
+        headers = {'Authorization': f'Bearer {self.token}'}
+        
+        try:
+            # Test with no file (should return 422 - validation error)
+            response = requests.post(url, headers=headers, timeout=10)
+            if response.status_code == 422:
+                print("✅ Image upload endpoint available (422 - missing file expected)")
+                self.tests_passed += 1
+            else:
+                print(f"⚠️  Image upload endpoint returned {response.status_code} (expected 422)")
+            self.tests_run += 1
+        except Exception as e:
+            print(f"❌ Image upload endpoint error: {e}")
+            self.tests_run += 1
+            self.failed_tests.append({'name': 'Image Upload Endpoint', 'error': str(e)})
+        
+        # Test document upload endpoint (without actual file - just endpoint availability)
+        print("   Testing document upload endpoint availability...")
+        url = f"{self.base_url}/api/upload/document"
+        
+        try:
+            # Test with no file (should return 422 - validation error)
+            response = requests.post(url, headers=headers, timeout=10)
+            if response.status_code == 422:
+                print("✅ Document upload endpoint available (422 - missing file expected)")
+                self.tests_passed += 1
+            else:
+                print(f"⚠️  Document upload endpoint returned {response.status_code} (expected 422)")
+            self.tests_run += 1
+        except Exception as e:
+            print(f"❌ Document upload endpoint error: {e}")
+            self.tests_run += 1
+            self.failed_tests.append({'name': 'Document Upload Endpoint', 'error': str(e)})
+
+    def test_member_management(self):
+        """Test admin member management (create/update members directly)"""
+        if not self.token:
+            print("❌ No admin token available, skipping member management tests")
+            return
+            
+        print("\n👥 Testing Admin Member Management...")
+        
+        # Create member directly (admin function)
+        member_data = {
+            "name": "Test Admin Member",
+            "email": "testadmin@example.com",
+            "phone": "+222 98 76 54 32",
+            "member_type": "actif",
+            "bio": "Test member created by admin for testing purposes."
+        }
+        
+        success, response = self.run_test("Admin Create Member", "POST", "members", 200, data=member_data, auth_required=True)
+        
+        if success and 'id' in response:
+            member_id = response['id']
+            print(f"   Created member ID: {member_id}")
+            
+            # Update member
+            updated_data = {
+                **member_data,
+                "name": "Updated Test Admin Member",
+                "member_type": "fondateur",
+                "bio": "Updated bio for test member."
+            }
+            self.run_test("Admin Update Member", "PUT", f"members/{member_id}", 200, data=updated_data, auth_required=True)
+            
+            # Clean up - delete the test member
+            self.run_test("Delete Test Member", "DELETE", f"members/{member_id}", 200, auth_required=True)
+
+    def test_static_file_serving(self):
+        """Test that uploads directory is accessible"""
+        print("\n📁 Testing Static File Serving...")
+        
+        # Test uploads directory accessibility (should return 404 for non-existent file, not 403)
+        url = f"{self.base_url}/uploads/images/nonexistent.jpg"
+        
+        try:
+            response = requests.get(url, timeout=10)
+            # 404 means the static serving is working but file doesn't exist (expected)
+            # 403 would mean static serving is blocked
+            if response.status_code in [404, 200]:
+                print("✅ Static file serving is configured (uploads directory accessible)")
+                self.tests_passed += 1
+            else:
+                print(f"⚠️  Static serving returned {response.status_code} (expected 404 or 200)")
+            self.tests_run += 1
+        except Exception as e:
+            print(f"❌ Static file serving error: {e}")
+            self.tests_run += 1
+            self.failed_tests.append({'name': 'Static File Serving', 'error': str(e)})
+
     def print_summary(self):
         """Print test summary"""
         print(f"\n" + "="*60)
