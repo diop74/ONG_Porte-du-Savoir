@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Target, Calendar, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,7 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchProject();
-  }, [id]);
-
-  const fetchProject = async () => {
+  const fetchProject = useCallback(async () => {
     try {
       const res = await fetch(`${API}/api/projects/${id}`);
       if (res.ok) {
@@ -25,7 +21,11 @@ export default function ProjectDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchProject();
+  }, [fetchProject]);
 
   if (loading) {
     return (
@@ -38,7 +38,9 @@ export default function ProjectDetailPage() {
   if (!project) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center pt-20">
-        <h2 className="text-2xl font-bold text-slate-900 mb-4">Projet non trouvé</h2>
+        <h2 className="text-2xl font-bold text-slate-900 mb-4">
+          Projet non trouvé
+        </h2>
         <Link to="/projets">
           <Button className="btn-primary">Retour aux projets</Button>
         </Link>
@@ -53,7 +55,10 @@ export default function ProjectDetailPage() {
         <div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url(${project.image_url || "https://images.unsplash.com/flagged/photo-1579133311477-9121405c78dd?w=1200"})`,
+            backgroundImage: `url(${
+              project.image_url ||
+              "https://images.unsplash.com/flagged/photo-1579133311477-9121405c78dd?w=1200"
+            })`,
           }}
         />
         <div className="absolute inset-0 hero-overlay" />
@@ -68,7 +73,9 @@ export default function ProjectDetailPage() {
             </Link>
             <span
               className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-4 ${
-                project.status === "en_cours" ? "badge-success" : "badge-info"
+                project.status === "en_cours"
+                  ? "badge-success"
+                  : "badge-info"
               }`}
             >
               {project.status === "en_cours" ? "En cours" : "Terminé"}
@@ -84,12 +91,13 @@ export default function ProjectDetailPage() {
       <section className="py-16 bg-white">
         <div className="container-custom">
           <div className="grid lg:grid-cols-3 gap-12">
-            {/* Main Content */}
             <div className="lg:col-span-2">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">Description</h2>
-              <div className="prose text-slate-600 leading-relaxed">
-                <p>{project.description}</p>
-              </div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">
+                Description
+              </h2>
+              <p className="text-slate-600 leading-relaxed">
+                {project.description}
+              </p>
 
               {project.objectives && (
                 <div className="mt-10">
@@ -98,16 +106,20 @@ export default function ProjectDetailPage() {
                     Objectifs
                   </h2>
                   <div className="bg-emerald-50 rounded-xl p-6">
-                    <p className="text-slate-700 leading-relaxed">{project.objectives}</p>
+                    <p className="text-slate-700 leading-relaxed">
+                      {project.objectives}
+                    </p>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Sidebar */}
             <div className="lg:col-span-1">
               <div className="card-marketing sticky top-24">
-                <h3 className="font-semibold text-slate-900 mb-4">Informations</h3>
+                <h3 className="font-semibold text-slate-900 mb-4">
+                  Informations
+                </h3>
+
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-sky-100 flex items-center justify-center">
@@ -116,17 +128,22 @@ export default function ProjectDetailPage() {
                     <div>
                       <p className="text-xs text-slate-500">Statut</p>
                       <p className="font-medium text-slate-900">
-                        {project.status === "en_cours" ? "En cours" : "Terminé"}
+                        {project.status === "en_cours"
+                          ? "En cours"
+                          : "Terminé"}
                       </p>
                     </div>
                   </div>
+
                   {project.date && (
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
                         <Calendar className="w-5 h-5 text-emerald-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-slate-500">Date de début</p>
+                        <p className="text-xs text-slate-500">
+                          Date de début
+                        </p>
                         <p className="font-medium text-slate-900">
                           {new Date(project.date).toLocaleDateString("fr-FR", {
                             year: "numeric",
@@ -143,8 +160,10 @@ export default function ProjectDetailPage() {
                   <p className="text-slate-600 text-sm mb-4">
                     Vous souhaitez contribuer à ce projet ?
                   </p>
-                  <Link to="/contact" className="block">
-                    <Button className="btn-primary w-full">Nous contacter</Button>
+                  <Link to="/contact">
+                    <Button className="btn-primary w-full">
+                      Nous contacter
+                    </Button>
                   </Link>
                 </div>
               </div>
