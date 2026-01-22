@@ -11,18 +11,6 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProject = async () => {
-    try {
-      const res = await fetch(`${API}/api/projects/${id}`);
-      if (res.ok) {
-        setProject(await res.json());
-      }
-    } catch (e) {
-      console.error("Error:", e);
-    } finally {
-      setLoading(false);
-    }
-  };
     fetchProject();
   }, [id]);
 

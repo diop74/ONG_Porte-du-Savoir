@@ -11,18 +11,6 @@ export default function ArticleDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchArticle = async () => {
-    try {
-      const res = await fetch(`${API}/api/articles/${id}`);
-      if (res.ok) {
-        setArticle(await res.json());
-      }
-    } catch (e) {
-      console.error("Error:", e);
-    } finally {
-      setLoading(false);
-    }
-  };
     fetchArticle();
   }, [id]);
 
