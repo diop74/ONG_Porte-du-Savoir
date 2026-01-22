@@ -138,7 +138,7 @@ class PorteDuSavoirAPITester:
     def test_admin_endpoints(self):
         """Test admin-only endpoints"""
         if not self.token:
-            print("❌ No admin token available, skipping admin tests")
+            print(" No admin token available, skipping admin tests")
             return
             
         print("\n🔒 Testing Admin Endpoints...")
@@ -155,7 +155,7 @@ class PorteDuSavoirAPITester:
     def test_project_crud(self):
         """Test project CRUD operations"""
         if not self.token:
-            print("❌ No admin token available, skipping project CRUD tests")
+            print(" No admin token available, skipping project CRUD tests")
             return
             
         print("\n📁 Testing Project CRUD...")
@@ -188,7 +188,7 @@ class PorteDuSavoirAPITester:
     def test_article_crud(self):
         """Test article CRUD operations"""
         if not self.token:
-            print("❌ No admin token available, skipping article CRUD tests")
+            print(" No admin token available, skipping article CRUD tests")
             return
             
         print("\n📰 Testing Article CRUD...")
@@ -221,10 +221,10 @@ class PorteDuSavoirAPITester:
     def test_upload_endpoints(self):
         """Test file upload endpoints"""
         if not self.token:
-            print("❌ No admin token available, skipping upload tests")
+            print(" No admin token available, skipping upload tests")
             return
             
-        print("\n📤 Testing Upload Endpoints...")
+        print("\n Testing Upload Endpoints...")
         
         # Test image upload endpoint (without actual file - just endpoint availability)
         print("   Testing image upload endpoint availability...")
@@ -235,13 +235,13 @@ class PorteDuSavoirAPITester:
             # Test with no file (should return 422 - validation error)
             response = requests.post(url, headers=headers, timeout=10)
             if response.status_code == 422:
-                print("✅ Image upload endpoint available (422 - missing file expected)")
+                print(" Image upload endpoint available (422 - missing file expected)")
                 self.tests_passed += 1
             else:
-                print(f"⚠️  Image upload endpoint returned {response.status_code} (expected 422)")
+                print(f"  Image upload endpoint returned {response.status_code} (expected 422)")
             self.tests_run += 1
         except Exception as e:
-            print(f"❌ Image upload endpoint error: {e}")
+            print(f" Image upload endpoint error: {e}")
             self.tests_run += 1
             self.failed_tests.append({'name': 'Image Upload Endpoint', 'error': str(e)})
         
@@ -253,20 +253,20 @@ class PorteDuSavoirAPITester:
             # Test with no file (should return 422 - validation error)
             response = requests.post(url, headers=headers, timeout=10)
             if response.status_code == 422:
-                print("✅ Document upload endpoint available (422 - missing file expected)")
+                print(" Document upload endpoint available (422 - missing file expected)")
                 self.tests_passed += 1
             else:
-                print(f"⚠️  Document upload endpoint returned {response.status_code} (expected 422)")
+                print(f"  Document upload endpoint returned {response.status_code} (expected 422)")
             self.tests_run += 1
         except Exception as e:
-            print(f"❌ Document upload endpoint error: {e}")
+            print(f" Document upload endpoint error: {e}")
             self.tests_run += 1
             self.failed_tests.append({'name': 'Document Upload Endpoint', 'error': str(e)})
 
     def test_member_management(self):
         """Test admin member management (create/update members directly)"""
         if not self.token:
-            print("❌ No admin token available, skipping member management tests")
+            print(" No admin token available, skipping member management tests")
             return
             
         print("\n👥 Testing Admin Member Management...")
@@ -316,14 +316,14 @@ class PorteDuSavoirAPITester:
                 print(f"⚠️  Static serving returned {response.status_code} (expected 404 or 200)")
             self.tests_run += 1
         except Exception as e:
-            print(f"❌ Static file serving error: {e}")
+            print(f" Static file serving error: {e}")
             self.tests_run += 1
             self.failed_tests.append({'name': 'Static File Serving', 'error': str(e)})
 
     def print_summary(self):
         """Print test summary"""
         print(f"\n" + "="*60)
-        print(f"📊 TEST SUMMARY")
+        print(f" TEST SUMMARY")
         print(f"="*60)
         print(f"Tests run: {self.tests_run}")
         print(f"Tests passed: {self.tests_passed}")
@@ -331,7 +331,7 @@ class PorteDuSavoirAPITester:
         print(f"Success rate: {(self.tests_passed/self.tests_run*100):.1f}%" if self.tests_run > 0 else "0%")
         
         if self.failed_tests:
-            print(f"\n❌ FAILED TESTS:")
+            print(f"\nFAILED TESTS:")
             for i, test in enumerate(self.failed_tests, 1):
                 print(f"{i}. {test['name']}")
                 if 'error' in test:
@@ -343,7 +343,7 @@ class PorteDuSavoirAPITester:
         return len(self.failed_tests) == 0
 
 def main():
-    print("🚀 Starting Porte du Savoir API Testing...")
+    print(" Starting Porte du Savoir API Testing...")
     print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     tester = PorteDuSavoirAPITester()
